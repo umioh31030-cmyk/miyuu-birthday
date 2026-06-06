@@ -49,7 +49,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#050215;font-family:
 .door-knob{position:absolute;bottom:9%;right:15%;width:clamp(7px,1.3vw,12px);height:clamp(7px,1.3vw,12px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe57a,#b8870a);border:1px solid #7a5a00;z-index:2;}
 .door-lamp{position:absolute;top:4px;left:50%;transform:translateX(-50%);width:clamp(8px,1.5vw,13px);height:clamp(8px,1.5vw,13px);border-radius:50%;background:#990000;border:1.5px solid #550000;z-index:2;transition:background 0.4s,box-shadow 0.4s;}
 .door-btn.unlocked .door-lamp{background:#00ee77;border-color:#007744;box-shadow:0 0 8px #00ee77;}
-.door-char{position:absolute;bottom:14%;left:0;right:0;height:78%;object-fit:contain;object-position:bottom center;padding:0 6px;z-index:2;opacity:0.3;filter:brightness(0.5) saturate(0.3);transition:opacity 0.5s,filter 0.5s;}
+.door-char{position:absolute;bottom:14%;left:0;right:0;height:78%;object-fit:contain;object-position:bottom center;padding:0 6px;z-index:2;opacity:0.75;filter:brightness(0.75) saturate(0.7);transition:opacity 0.5s,filter 0.5s;}
 .door-btn.unlocked .door-char{opacity:1;filter:none;}
 .door-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,3.5vw,32px);z-index:3;transition:opacity 0.4s;}
 .door-btn.unlocked .door-lock{opacity:0;pointer-events:none;}
@@ -401,7 +401,23 @@ function openModal(d) {
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 function handleOverlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
 
+function fadeBGM(targetVol, duration) {
+  var start = bgm.volume;
+  var steps = 20;
+  var stepTime = duration / steps;
+  var step = 0;
+  var timer = setInterval(function() {
+    step++;
+    bgm.volume = Math.max(0, Math.min(1, start + (targetVol - start) * (step / steps)));
+    if (step >= steps) {
+      clearInterval(timer);
+      if (targetVol === 0) bgm.muted = true;
+    }
+  }, stepTime);
+}
+
 function startSpecial() {
+  fadeBGM(0, 1500);
   var ss = document.getElementById('special-screen');
   var fc = document.getElementById('film-count');
   ss.classList.add('show');
@@ -448,6 +464,9 @@ function startVideo() {
 function closeSpecial() {
   document.getElementById('sp-video-wrap').classList.remove('show');
   document.getElementById('sp-iframe-wrap').innerHTML = '';
+  bgm.muted = false;
+  bgm.volume = 0;
+  fadeBGM(0.4, 2000);
 }
 
 function openSchedule() {
